@@ -1,0 +1,295 @@
+{
+	"info": {
+		"_postman_id": "8ee74e0d-f005-472e-9236-8d17cd9dbf73",
+		"name": "Devathon",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19407551"
+	},
+	"item": [
+		{
+			"name": "Usuarios",
+			"item": [
+				{
+					"name": "obtener token autenticacion",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"admin\",\r\n    \"password\":\"andres87\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/token/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"token",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "crear usuario",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIxOTIzNDk1LCJpYXQiOjE3MjE5MTk4OTUsImp0aSI6IjU3NDNiNjE5ZGJhYjRjZWFhMjBlYjViZTEwYTZjMDE5IiwidXNlcl9pZCI6MX0.7RpyideldPlQMAvP06DQcxCSNZW0nfQFzMH9hDLt2-A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\":\"andres\",\r\n    \"apellido\":\"test\",\r\n    \"correo_electronico\":\"test@test.com\",\r\n    \"telefono\": \"60333333\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/clientes/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"clientes",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "editar usuario",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIxOTIzNDk1LCJpYXQiOjE3MjE5MTk4OTUsImp0aSI6IjU3NDNiNjE5ZGJhYjRjZWFhMjBlYjViZTEwYTZjMDE5IiwidXNlcl9pZCI6MX0.7RpyideldPlQMAvP06DQcxCSNZW0nfQFzMH9hDLt2-A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"id\": 1,\r\n        \"nombre\": \"andres\",\r\n        \"apellido\": \"test\",\r\n        \"telefono\": \"60333333\",\r\n        \"correo_electronico\": \"test@test.com\",\r\n        \"fecha_registro\": \"2024-07-25T15:13:21.411735Z\",\r\n        \"password\": \"pepito\"\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/clientes/1/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"clientes",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "consultar usuarios",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIxOTIzNDk1LCJpYXQiOjE3MjE5MTk4OTUsImp0aSI6IjU3NDNiNjE5ZGJhYjRjZWFhMjBlYjViZTEwYTZjMDE5IiwidXNlcl9pZCI6MX0.7RpyideldPlQMAvP06DQcxCSNZW0nfQFzMH9hDLt2-A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/clientes/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"clientes",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Empleados",
+			"item": [
+				{
+					"name": "consultar empleados",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIxOTQyNTcxLCJpYXQiOjE3MjE5Mzg5NzEsImp0aSI6IjRiOTI2ZmE1OTVkNzQzOTBiYjA5YjRjZTMyNjI3NTEyIiwidXNlcl9pZCI6MX0.dB_f5pC0OJkgYgpbPcFjpzRQZbgyvswAf6TX4Q1pFlU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/empleados/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"empleados",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "crear empleado",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIxOTQyNTcxLCJpYXQiOjE3MjE5Mzg5NzEsImp0aSI6IjRiOTI2ZmE1OTVkNzQzOTBiYjA5YjRjZTMyNjI3NTEyIiwidXNlcl9pZCI6MX0.dB_f5pC0OJkgYgpbPcFjpzRQZbgyvswAf6TX4Q1pFlU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\":\"andres\",\r\n    \"apellido\":\"test\",\r\n    \"correo_electronico\":\"test@test.com\",\r\n    \"telefono\": \"60333333\",\r\n    \"password\":\"prueba\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/empleados/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"empleados",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "editar empleado",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIxOTQyNTcxLCJpYXQiOjE3MjE5Mzg5NzEsImp0aSI6IjRiOTI2ZmE1OTVkNzQzOTBiYjA5YjRjZTMyNjI3NTEyIiwidXNlcl9pZCI6MX0.dB_f5pC0OJkgYgpbPcFjpzRQZbgyvswAf6TX4Q1pFlU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\":\"nombre editado\",\r\n    \"apellido\":\"apellido editado\",\r\n    \"correo_electronico\":\"test@test.com\",\r\n    \"telefono\": \"60333333\",\r\n    \"password\":\"prueba\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/empleados/1/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"empleados",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
