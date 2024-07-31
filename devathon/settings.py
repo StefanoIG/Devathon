@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'mesas',
     'usuarios',
     'empleados',
     'rest_framework_simplejwt',
@@ -80,12 +81,8 @@ WSGI_APPLICATION = 'devathon.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'devathon',  # Cambia esto por el nombre de tu base de datos
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',  # O el host de tu servidor de PostgreSQL
-        'PORT': '5432',  # El puerto por defecto de PostgreSQL
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
