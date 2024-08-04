@@ -4,6 +4,11 @@ from django.db import models
 
 # Tabla clientes
 class Cliente(models.Model):
+    ROLE_CHOICES = (
+        ('admin', 'Administrador'),
+        ('user', 'Usuario'),
+        ('empleado', 'Empleado'),
+    )
     nombre = models.CharField(max_length=50)
     apellido = models.CharField(max_length=50)
     telefono = models.CharField(max_length=50)
