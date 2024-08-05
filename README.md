@@ -41,7 +41,7 @@ Devathon Grupo#3
 - Añadir la app a `INSTALLED_APPS` en `settings.py`
 - Añadir la url a `urlpatterns` en `urls.py`, ejemplo: `path('api/', include('nombre_app.urls'))`
 
-## Generar y uso de Documentación
+## Generar y uso de Documentación (https://drf-spectacular.readthedocs.io/en/latest/)
 
 - Dependencias
   pip install jsonschema==2.6
