@@ -154,3 +154,9 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
     'JTI_CLAIM': 'jti',
 }
+
+AUTH_USER_MODEL = 'usuarios.Cliente'  # Asegúrate de que esto esté configurado correctamente
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
