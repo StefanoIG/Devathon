@@ -40,3 +40,11 @@ Devathon Grupo#3
 - Crear una url: en urls.py
 - Añadir la app a `INSTALLED_APPS` en `settings.py`
 - Añadir la url a `urlpatterns` en `urls.py`, ejemplo: `path('api/', include('nombre_app.urls'))`
+
+## Generar y uso de Documentación
+
+- Dependencias
+  pip install jsonschema==2.6
+  pip install drf-spectacular
+- Uso
+  http://127.0.0.1:8000/api/schema/swagger-ui/

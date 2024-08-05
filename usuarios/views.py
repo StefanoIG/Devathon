@@ -7,8 +7,30 @@ from .models import Cliente
 from mesas.models import Mesa
 from mesas.serializers import MesaSerializer,ClienteMesaSerializer
 from .serializers import ClienteSerializer
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Registrar un nuevo cliente
+@extend_schema(
+    request=ClienteSerializer,
+    responses={201: ClienteSerializer},
+    examples=[
+        OpenApiExample(
+            'Registrar un nuevo cliente',
+            summary='Registrar un nuevo cliente',
+            description='Registrar un nuevo cliente',
+            value={
+                'nombre': 'Juan',
+                'apellido': 'Pérez',
+                'correo_electronico': 'test@test.com',
+                'telefono': '1234567890',
+                'password': 'password',
+                'rol': 'user'
+            },
+        ),
+    ],
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register(request):
@@ -17,7 +39,45 @@ def register(request):
         if serializer.is_valid():
             cliente = serializer.save(password=make_password(serializer.validated_data['password']))
             return Response(ClienteSerializer(cliente).data, status=status.HTTP_201_CREATED)
+        if serializer.errors.get('correo_electronico') and serializer.errors.get('correo_electronico')==['cliente with this correo electronico already exists.']:
+            return Response({'error': 'Correo electrónico ya registrado'}, status=status.HTTP_409_CONFLICT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Iniciar sesión / Login
+@extend_schema(
+    request=ClienteSerializer,
+    responses={
+        200: ClienteSerializer, 
+        404: 'Correo electrónico o contraseña incorrectos'
+        },
+    examples=[
+        OpenApiExample(
+            'Iniciar sesión',
+            summary='Iniciar sesión',
+            description='Iniciar sesión',
+            value={
+                'correo_electronico': 'test2@test.com',
+                'password': 'prueba',
+            },
+        ),
+    ],
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login(request):
+    if request.method == 'POST':
+        email = request.data.get('correo_electronico')
+        password = request.data.get('password')
+        try:
+            cliente = Cliente.objects.get(correo_electronico=email)
+        except Cliente.DoesNotExist:
+            return Response({'error': 'Correo electrónico o contraseña incorrectos'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if not cliente.check_password(password):
+            return Response({'error': 'Correo electrónico o contraseña incorrectos'}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response(ClienteSerializer(cliente).data, status=status.HTTP_200_OK)
 
 # Definición de permisos personalizados
 from rest_framework import permissions
@@ -40,7 +100,29 @@ from rest_framework.response import Response
 
 class ClienteDetailView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter('id', OpenApiTypes.INT, description='ID del cliente')
+        ],
+        responses={200: ClienteSerializer},
+        examples=[
+            OpenApiExample(
+                'Obtener detalles de un cliente',
+                summary='Obtener detalles de un cliente',
+                description='Obtener detalles de un cliente',
+                value={
+                    "id": 2,
+                    "nombre": "andres",
+                    "apellido": "test",
+                    "telefono": "60333333",
+                    "correo_electronico": "test2@test.com",
+                    "fecha_registro": "2024-08-05T13:25:23.126112Z"
+                },
+            ),
+        ],
+    )
     def get(self, request):
         user = request.user
         if user.rol == 'admin':
