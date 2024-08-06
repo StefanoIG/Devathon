@@ -17,12 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import MyTokenObtainPairView  # Asegúrate de importar la vista personalizada
+from .views import MyTokenObtainPairView,PasswordResetRequestAPI, PasswordResetConfirmAPI  # Asegúrate de importar la vista personalizada
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
     path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/password_reset/', PasswordResetRequestAPI.as_view(), name='password_reset'),
+    path('api/password_reset_confirm/', PasswordResetConfirmAPI.as_view(), name='password_reset_confirm'),
     path('admin/', admin.site.urls),
     path('', include('usuarios.urls')),
     path('', include('empleados.urls')),
