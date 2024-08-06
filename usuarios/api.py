@@ -11,9 +11,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
 
-
-
-
 class IsAdminUser(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.role == 'admin'

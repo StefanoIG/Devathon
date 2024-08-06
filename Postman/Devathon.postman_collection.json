@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\":\"admin\",\r\n    \"password\":\"andres87\"\r\n}",
+							"raw": "{\r\n    \"correo_electronico\":\"test2@test.com\",\r\n    \"password\":\"prueba\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -36,6 +36,40 @@
 							"path": [
 								"api",
 								"token",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"correo_electronico\":\"test2@test.com\",\r\n    \"password\":\"prueba\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/login/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"login",
 								""
 							]
 						}
@@ -137,7 +171,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIxOTIzNDk1LCJpYXQiOjE3MjE5MTk4OTUsImp0aSI6IjU3NDNiNjE5ZGJhYjRjZWFhMjBlYjViZTEwYTZjMDE5IiwidXNlcl9pZCI6MX0.7RpyideldPlQMAvP06DQcxCSNZW0nfQFzMH9hDLt2-A",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyODAwNjAzLCJpYXQiOjE3MjI3OTcwMDMsImp0aSI6ImY0YmE5OTA2MTRmZjRhMjZiMjRjNmZmYmMxOGU2ZTNiIiwidXNlcl9pZCI6MX0.9S9YQepfLlX_a2yWojNogiI70uFlEGvyH52p94KeckY",
 									"type": "string"
 								}
 							]
@@ -162,6 +196,81 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "registro",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\":\"andres\",\r\n    \"apellido\":\"test\",\r\n    \"correo_electronico\":\"test4@test.com\",\r\n    \"telefono\": \"60333333\",\r\n    \"password\":\"prueba\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/register/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Protegido Consultar Usuarios",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyODgxMTY4LCJpYXQiOjE3MjI4Nzc1NjgsImp0aSI6ImFkMzI5ZTZkYmE0MDQ5MzFhOWU4ZWVlZDE2ODExZDc1IiwidXNlcl9pZCI6MiwiZW1haWwiOiJ0ZXN0MkB0ZXN0LmNvbSJ9.AF-MusyEFmCErlmhZJuO-6uQ1sEA-9dEqjHCZ0XQEhs",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/clientes/?id=2",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"clientes",
+								""
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -176,7 +285,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIxOTQyNTcxLCJpYXQiOjE3MjE5Mzg5NzEsImp0aSI6IjRiOTI2ZmE1OTVkNzQzOTBiYjA5YjRjZTMyNjI3NTEyIiwidXNlcl9pZCI6MX0.dB_f5pC0OJkgYgpbPcFjpzRQZbgyvswAf6TX4Q1pFlU",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyNTQ5MDg4LCJpYXQiOjE3MjI1NDU0ODgsImp0aSI6IjgwYzNmMmYxNDI2YzQwZjA5Y2Y1NmMyNGZiOWYwMDZiIiwidXNlcl9pZCI6MX0.XlVVki5uZn2GsS0dOU2SriCKTS_xgIndTHvdDTltWQw",
 									"type": "string"
 								}
 							]
@@ -283,6 +392,50 @@
 								"api",
 								"empleados",
 								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "borrar empleado",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyNTQ5MDg4LCJpYXQiOjE3MjI1NDU0ODgsImp0aSI6IjgwYzNmMmYxNDI2YzQwZjA5Y2Y1NmMyNGZiOWYwMDZiIiwidXNlcl9pZCI6MX0.XlVVki5uZn2GsS0dOU2SriCKTS_xgIndTHvdDTltWQw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nombre\":\"nombre editado\",\r\n    \"apellido\":\"apellido editado\",\r\n    \"correo_electronico\":\"test@test.com\",\r\n    \"telefono\": \"60333333\",\r\n    \"password\":\"prueba\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/empleados/3/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"empleados",
+								"3",
 								""
 							]
 						}
@@ -431,6 +584,125 @@
 							"path": [
 								"admin",
 								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Mesas",
+			"item": [
+				{
+					"name": "consultar mesas",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyNTQ1MDYyLCJpYXQiOjE3MjI1NDE0NjIsImp0aSI6IjE5YzIxMjQ4MTE0YzRkZGQ5NmNmNDQ4NmQzZDVkMWJmIiwidXNlcl9pZCI6MX0.wVeZK30Zg0MfLaa7NLQtHxnfdskGVRTw7G92kvZtI7I",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/mesas/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"mesas",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "crear mesa",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyNTM0MzY1LCJpYXQiOjE3MjI1MzA3NjUsImp0aSI6IjRlY2Q0ZWJjMDA5MDQ4Yzg4NGFhNDMwNTI2NmEzMWVhIiwidXNlcl9pZCI6MX0.0kFsZAZfAhvQy9hCO-d0pyL1nCHvkCQtvukHW7oQc80",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"numero\":\"3\",\r\n    \"capacidad\":\"22\",\r\n    \"estado\": \"libre\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/mesas/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"mesas",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eliminar mesa",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzIyNTQ1MDYyLCJpYXQiOjE3MjI1NDE0NjIsImp0aSI6IjE5YzIxMjQ4MTE0YzRkZGQ5NmNmNDQ4NmQzZDVkMWJmIiwidXNlcl9pZCI6MX0.wVeZK30Zg0MfLaa7NLQtHxnfdskGVRTw7G92kvZtI7I",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/api/v1/mesas/1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"v1",
+								"mesas",
+								"1"
 							]
 						}
 					},
