@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'usuarios',
     'empleados',
     'rest_framework_simplejwt',
-    'django_extensions'
+    'django_extensions',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -137,6 +138,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -167,3 +169,20 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'Correo aqui'
 EMAIL_HOST_PASSWORD = 'clave aqui'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Devathon API',
+    'DESCRIPTION': 'Proyecto de gestión de un restaurante',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [
+        {'bearerAuth': []}
+    ],
+    'SECURITY_DEFINITIONS': {
+        'bearerAuth': {
+            'type': 'http',
+            'scheme': 'bearer',
+            'bearerFormat': 'JWT',
+        }
+    },
+}
