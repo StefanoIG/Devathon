@@ -10,6 +10,6 @@ router.register('api/clientes', ClienteViewSet, 'clientes')
 urlpatterns = router.urls + [
     path('api/v1/register/', register, name='register'),
     path('api/v1/clientes/', ClienteDetailView.as_view(), name='cliente-detail'),
-    path('mesas/', MesasView.as_view(), name='mesas-view'),
+    path('api/v1/mesas/', MesasView.as_view(), name='mesas-view'),
     path('mesas/<int:pk>/', MesasView.as_view(), name='mesas-detail'),  # Para PUT y DELETE
 ]
