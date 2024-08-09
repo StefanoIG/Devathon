@@ -12,3 +12,5 @@ class MesaViewSet(viewsets.ModelViewSet):
     serializer_class = MesaSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
+    

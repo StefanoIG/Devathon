@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'mesas',
     'usuarios',
     'empleados',
+    'reservas',
     'rest_framework_simplejwt',
     'django_extensions'
 ]
