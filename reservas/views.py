@@ -3,6 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from threading import Timer
+from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -11,28 +12,98 @@ from .models import Reserva
 from mesas.models import Mesa
 from .serializers import ReservaSerializer
 
-# Signal para actualizar el estado de la mesa
+# Validaciones de hora de reserva solo para clientes
+def validate_reservation_time_for_cliente(fecha_reserva, hora_reserva):
+    # Convertir fecha_reserva a un objeto datetime.date si es necesario
+    if isinstance(fecha_reserva, str):
+        fecha_reserva = datetime.datetime.strptime(fecha_reserva, '%Y-%m-%d').date()
+    if isinstance(hora_reserva, str):
+        hora_reserva = datetime.datetime.strptime(hora_reserva, '%H:%M:%S').time()
+
+    reserva_datetime = datetime.datetime.combine(fecha_reserva, hora_reserva)
+    now = timezone.now()
+
+    # Validar que la fecha de reserva no sea en el pasado
+    if reserva_datetime < now:
+        return {"error": "No puedes reservar para una fecha o hora pasada."}
+
+    # Validar que la hora de reserva esté entre las 10:00 AM y las 6:00 PM
+    if not (10 <= hora_reserva.hour < 18):
+        return {"error": "Las reservas solo se permiten entre las 10:00 AM y las 6:00 PM."}
+    
+    # Validar que la reserva se haga con al menos 10 minutos de anticipación
+    if (reserva_datetime - now).total_seconds() < 600:  # 10 minutos
+        return {"error": "Debe reservar con al menos 10 minutos de anticipación."}
+
+    return None  # No hay errores de validación
+
+
+# Enviar correo electrónico de advertencia
+def send_warning_email(reserva):
+    cliente = reserva.cliente
+    subject = 'Advertencia: Tu reserva está por expirar'
+    message = (
+        f'Estimado {cliente.first_name},\n\n'
+        'Tu reserva está por expirar en 30 minutos. Si deseas mantener tu reserva, por favor confirma con un empleado.\n'
+        'Si deseas cancelar la reserva, puedes hacerlo haciendo clic en el siguiente enlace:\n'
+        f'http://yourdomain.com/cancelar-reserva/{reserva.id}/\n\n'
+        'Gracias por utilizar nuestro sistema de reservas.\n\n'
+        'Saludos cordiales,\n'
+        'Equipo de Reservas'
+    )
+    send_mail(subject, message, 'noreply@yourdomain.com', [cliente.email])
+
+# Cancelar la reserva si no ha sido confirmada después de una hora
+def cancel_unconfirmed_reservation(reserva):
+    reserva.refresh_from_db()  # Asegurarse de tener el último estado de la reserva
+    if reserva.estado == 'cancelada':
+        return  # No hacer nada si la reserva ya fue confirmada
+
+    mesa = reserva.mesa
+    mesa.estado = 'disponible'
+    mesa.save()
+    
+    reserva.delete()
+
+    # Enviar correo de cancelación
+    cliente = reserva.cliente
+    subject = 'Tu reserva ha sido cancelada'
+    message = (
+        f'Estimado {cliente.first_name},\n\n'
+        'Tu reserva ha sido cancelada porque no fue confirmada por un empleado dentro de una hora.\n'
+        'Si necesitas más asistencia, por favor contáctanos.\n\n'
+        'Saludos cordiales,\n'
+        'Equipo de Reservas'
+    )
+    send_mail(subject, message, 'noreply@yourdomain.com', [cliente.email])
+
+# Signal para manejar las acciones después de crear una reserva
 @receiver(post_save, sender=Reserva)
-def update_mesa_status(sender, instance, **kwargs):
-    # Calcular el tiempo restante hasta 5 minutos antes de la reserva
+def handle_reservation(sender, instance, **kwargs):
+    # Convertir fecha_reserva y hora_reserva a datetime.date y datetime.time si es necesario
+    if isinstance(instance.fecha_reserva, str):
+        instance.fecha_reserva = datetime.datetime.strptime(instance.fecha_reserva, '%Y-%m-%d').date()
+    if isinstance(instance.hora_reserva, str):
+        instance.hora_reserva = datetime.datetime.strptime(instance.hora_reserva, '%H:%M:%S').time()
+
     reserva_datetime = datetime.datetime.combine(instance.fecha_reserva, instance.hora_reserva)
     reserva_datetime = timezone.make_aware(reserva_datetime)
-    time_until_update = (reserva_datetime - timezone.now()).total_seconds() - 300  # 5 minutos antes
+    now = timezone.now()
 
-    if time_until_update > 0:
-        # Crear un temporizador que cambie el estado de la mesa en el momento adecuado
-        Timer(time_until_update, change_mesa_status, [instance.mesa]).start()
+    # Calcular tiempos
+    time_until_warning = (reserva_datetime - now).total_seconds() - 1800  # 30 minutos antes de la hora de reserva
+    time_until_cancellation = (reserva_datetime - now).total_seconds() + 3600  # 1 hora después de la reserva
 
-def change_mesa_status(mesa):
-    mesa.estado = 'reservada'
-    mesa.save()
-
+    if time_until_warning > 0:
+        Timer(time_until_warning, send_warning_email, [instance]).start()
+    if time_until_cancellation > 0:
+        Timer(time_until_cancellation, cancel_unconfirmed_reservation, [instance]).start()
 
 # Vista para crear una reserva
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_reserva(request):
-    cliente = request.user  # Asumimos que el cliente es el usuario autenticado
+    cliente = request.user
     data = request.data
     mesa_id = data.get('mesa_id')
     
@@ -44,20 +115,25 @@ def create_reserva(request):
     if mesa.estado == 'reservada':
         return Response({"error": "La mesa ya está reservada"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Solo aplicar validaciones de tiempo para clientes
+    if cliente.groups.filter(name='cliente').exists():
+        fecha_reserva = data.get('fecha_reserva')
+        hora_reserva = data.get('hora_reserva')
+        validation_error = validate_reservation_time_for_cliente(fecha_reserva, hora_reserva)
+        if validation_error:
+            return Response(validation_error, status=status.HTTP_400_BAD_REQUEST)
+
     # Crear la reserva
     reserva = Reserva.objects.create(
         cliente=cliente,
-        empleado_id=data.get('empleado_id'),  # Puede ser None
+        empleado_id=data.get('empleado_id'),
         mesa=mesa,
         fecha_reserva=data.get('fecha_reserva'),
         hora_reserva=data.get('hora_reserva'),
-        estado='confirmada'  # O el estado inicial que prefieras
+        estado='confirmada'
     )
 
-    # No cambiamos el estado de la mesa aquí, se cambiará automáticamente 5 minutos antes de la reserva
-
     return Response(ReservaSerializer(reserva).data, status=status.HTTP_201_CREATED)
-
 
 # Vista para cancelar una reserva
 @api_view(['DELETE'])
@@ -68,12 +144,10 @@ def cancel_reserva(request, pk):
     except Reserva.DoesNotExist:
         return Response({"error": "Reserva no encontrada"}, status=status.HTTP_404_NOT_FOUND)
 
-    # Restaurar el estado de la mesa
     mesa = reserva.mesa
     mesa.estado = 'disponible'
     mesa.save()
 
-    # Eliminar la reserva
     reserva.delete()
 
     return Response(status=status.HTTP_204_NO_CONTENT)
