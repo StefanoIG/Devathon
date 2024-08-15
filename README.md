@@ -15,6 +15,7 @@ Devathon Grupo#3
 - Consultar paquetes instalados en el entorno virtual: pip list
 - Instalar paquete de consulta de endpoints: pip install django-extensions y añadir `'django_extensions'` a `INSTALLED_APPS` en `settings.py`
 - Consultar endpoints: python manage.py show_urls
+- Instalar paquete de cors: pip install django-cors-headers y añadir `'corsheaders'` a `INSTALLED_APPS` en `settings.py`
 
 ## Manejo de entornos virtuales
 
