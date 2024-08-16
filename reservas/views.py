@@ -35,12 +35,12 @@ def validate_reservation_time_for_cliente(fecha_reserva, hora_reserva):
         return {"error": "No puedes reservar para una fecha o hora pasada."}
 
     # Validar que la hora de reserva esté entre las 10:00 AM y las 6:00 PM
-    if not (10 <= hora_reserva.hour < 18):
+    if not (9 <= hora_reserva.hour < 18):
         print("Error: Las reservas solo se permiten entre las 10:00 AM y las 6:00 PM.")
         return {"error": "Las reservas solo se permiten entre las 10:00 AM y las 6:00 PM."}
     
     # Validar que la reserva se haga con al menos 10 minutos de anticipación
-    if (reserva_datetime - now).total_seconds() < 600:  # 10 minutos
+    if (reserva_datetime - now).total_seconds() < 600:  # 10 minutos(600 segundos)
         print("Error: Debe reservar con al menos 10 minutos de anticipación.")
         return {"error": "Debe reservar con al menos 10 minutos de anticipación."}
     
@@ -49,10 +49,11 @@ def validate_reservation_time_for_cliente(fecha_reserva, hora_reserva):
 
 # Enviar correo electrónico de advertencia
 def send_warning_email(reserva):
+    print(f"Enviando correo de advertencia a {reserva.cliente.correo_electronico}...")
     cliente = reserva.cliente
     subject = 'Advertencia: Tu reserva está por expirar'
     message = (
-        f'Estimado {cliente.first_name},\n\n'
+        f'Estimado {cliente.nombre},\n\n'
         'Tu reserva está por expirar en 30 minutos. Si deseas mantener tu reserva, por favor confirma con un empleado.\n'
         'Si deseas cancelar la reserva, puedes hacerlo haciendo clic en el siguiente enlace:\n'
         f'http://yourdomain.com/cancelar-reserva/{reserva.id}/\n\n'
@@ -60,37 +61,42 @@ def send_warning_email(reserva):
         'Saludos cordiales,\n'
         'Equipo de Reservas'
     )
-    send_mail(subject, message, 'noreply@yourdomain.com', [cliente.email])
+    send_mail(subject, message, 'noreply@yourdomain.com', [cliente.correo_electronico])
+    print("Correo de advertencia enviado con éxito.")
 
 # Cancelar la reserva si no ha sido confirmada después de una hora
 def cancel_unconfirmed_reservation(reserva):
+    print(f"Cancelando reserva no confirmada ID: {reserva.id}...")
     reserva.refresh_from_db()  # Asegurarse de tener el último estado de la reserva
     if reserva.estado == 'cancelada':
-        return  # No hacer nada si la reserva ya fue confirmada
-
+        return  # No hacer nada si la reserva ya fue 
+    
+    print("Reserva no confirmada. Cancelando...")
     mesa = reserva.mesa
     mesa.estado = 'disponible'
     mesa.save()
-    
+    print(f"Mesa {mesa.numero} ahora está en estado 'disponible'.")
     reserva.delete()
-
+    print("Reserva cancelada.")
     # Enviar correo de cancelación
     cliente = reserva.cliente
+    print(f"Enviando correo de cancelación a {cliente.correo_electronico}...")
     subject = 'Tu reserva ha sido cancelada'
     message = (
-        f'Estimado {cliente.first_name},\n\n'
+        f'Estimado {cliente.nombre},\n\n'
         'Tu reserva ha sido cancelada porque no fue confirmada por un empleado dentro de una hora.\n'
         'Si necesitas más asistencia, por favor contáctanos.\n\n'
         'Saludos cordiales,\n'
         'Equipo de Reservas'
     )
-    send_mail(subject, message, 'noreply@yourdomain.com', [cliente.email])
+    send_mail(subject, message, 'noreply@yourdomain.com', [cliente.correo_electronico])
+    print("Correo de cancelación enviado con éxito .")
 
 # Cambiar el estado de la mesa a "reservada" 5 minutos antes de la reserva
 def set_mesa_as_reserved(reserva):
     reserva.refresh_from_db()
     mesa = reserva.mesa
-    mesa.estado = 'reservada'
+    mesa.estado = 'Reservada'
     mesa.save()
     print(f"Mesa {mesa.numero} ahora está en estado 'reservada'.")
 
@@ -113,9 +119,9 @@ def handle_reservation(sender, instance, **kwargs):
     print(f"Current DateTime: {now}")
 
     # Calcular tiempos
-    time_until_warning = (reserva_datetime - now).total_seconds() - 1800  # 30 minutos antes de la hora de reserva
-    time_until_cancellation = (reserva_datetime - now).total_seconds() + 3600  # 1 hora después de la reserva
-    time_until_reserved = (reserva_datetime - now).total_seconds() - 300  # 5 minutos antes de la hora de reserva
+    time_until_warning = (reserva_datetime - now).total_seconds() - 1800  # 30 minutos antes de la hora de reserva(1800 segundos)
+    time_until_cancellation = (reserva_datetime - now).total_seconds() + 3600  # 1 hora después de la reserva(3600 segundos)
+    time_until_reserved = (reserva_datetime - now).total_seconds() - 300  # 5 minutos antes de la hora de reserva(300 segundos)
 
     if time_until_warning > 0:
         print(f"Warning Timer set for {time_until_warning} seconds")
@@ -204,9 +210,40 @@ def cancel_reserva(request, pk):
         return Response({"error": "Reserva no encontrada"}, status=status.HTTP_404_NOT_FOUND)
 
     mesa = reserva.mesa
-    mesa.estado = 'disponible'
+    mesa.estado = 'Activa'
     mesa.save()
 
     reserva.delete()
 
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def confirmar_reserva(request):
+    print("Iniciando confirmación de reserva...")
+
+    # Verificar que el usuario tenga el rol de empleado o admin
+    if request.user.rol not in ['empleado', 'admin']:
+        print("Error: Solo empleados o admins pueden confirmar reservas.")
+        return Response({"error": "No tienes permiso para confirmar reservas."}, status=status.HTTP_403_FORBIDDEN)
+
+    reserva_id = request.data.get('reserva_id')
+
+    try:
+        reserva = Reserva.objects.get(id=reserva_id)
+    except Reserva.DoesNotExist:
+        print("Error: Reserva no encontrada.")
+        return Response({"error": "Reserva no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Cambiar el estado de la reserva a "confirmada"
+    reserva.estado = 'confirmada'
+    reserva.save()
+
+    # Actualizar el estado de la mesa a "reservada"
+    mesa = reserva.mesa
+    mesa.estado = 'reservada'
+    mesa.save()
+
+    print(f"Reserva ID: {reserva.id} confirmada exitosamente.")
+    return Response({"message": "Reserva confirmada exitosamente."}, status=status.HTTP_200_OK)
