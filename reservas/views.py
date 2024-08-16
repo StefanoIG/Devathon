@@ -247,3 +247,12 @@ def confirmar_reserva(request):
 
     print(f"Reserva ID: {reserva.id} confirmada exitosamente.")
     return Response({"message": "Reserva confirmada exitosamente."}, status=status.HTTP_200_OK)
+
+
+@receiver(post_save, sender=Reserva)
+def crear_factura_si_confirmada(sender, instance, **kwargs):
+    if instance.estado == 'Confirmada' and not hasattr(instance, 'factura'):
+        Factura.objects.create(
+            reserva=instance,
+            cliente=instance.cliente,
+        )
