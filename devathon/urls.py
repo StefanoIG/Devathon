@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import MyTokenObtainPairView,PasswordResetRequestAPI, PasswordResetConfirmAPI  # Asegúrate de importar la vista personalizada
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
     path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -29,4 +30,9 @@ urlpatterns = [
     path('', include('empleados.urls')),
     path('', include('mesas.urls')),
     path('', include('reservas.urls')),
+
+    # DOC
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
