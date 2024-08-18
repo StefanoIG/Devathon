@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.hashers import make_password
 from .models import Cliente
 from mesas.models import Mesa
-from mesas.serializers import MesaSerializer,ClienteMesaSerializer
+from mesas.serializers import MesaSerializer, ClienteMesaSerializer
 from .serializers import ClienteSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -150,8 +150,8 @@ class MesasView(APIView):
             mesas = Mesa.objects.all()
             serializer = MesaSerializer(mesas, many=True)
         elif user.rol == 'user':
-            mesas = Mesa.objects.all()
-            serializer = ClienteMesaSerializer(mesas, many=True)
+            mesas = Mesa.objects.all().values('id', 'estado')
+            return Response(mesas)
         else:
             return Response(status=status.HTTP_403_FORBIDDEN)
         

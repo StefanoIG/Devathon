@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    'corsheaders',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'mesas',
     'usuarios',
     'empleados',
+    'reservas',
     'rest_framework_simplejwt',
     'django_extensions',
     'drf_spectacular',
@@ -49,6 +51,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -112,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Guayaquil'
 
 USE_I18N = True
 
@@ -167,9 +170,16 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = 'stefano20033@gmail.com'
+EMAIL_HOST_PASSWORD = 'fynl zjhq mycd qlly'
+
+CORS_ALLOW_ALL_ORIGINS = True
+
 EMAIL_HOST_USER = 'Correo aqui'
 EMAIL_HOST_PASSWORD = 'clave aqui'
 
+# Config Swagger for documentation 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Devathon API',
     'DESCRIPTION': 'Proyecto de gestión de un restaurante',
@@ -186,3 +196,4 @@ SPECTACULAR_SETTINGS = {
         }
     },
 }
+
