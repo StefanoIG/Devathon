@@ -4,8 +4,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core.mail import send_mail
 from django.http import FileResponse
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 from io import BytesIO
 from .models import Factura
 from .serializers import FacturaSerializer
@@ -51,6 +49,8 @@ class FacturaCreateView(APIView):
             send_mail(
                 subject="Factura generada",
                 message=f"Estimado/a {reserva.cliente.nombre}, su factura ha sido generada. Puedes descargarla a continuación, monto total pagado: {monto_con_iva}.",
+                #Generar y enviar el archivo PDF de la funcion generate_pdf
+                attachment=[pdf_file],
                 from_email="tu_email@dominio.com",
                 recipient_list=[reserva.cliente.correo_electronico],
                 fail_silently=False,
@@ -81,6 +81,7 @@ class FacturaDownloadView(APIView):
         except Factura.DoesNotExist:
             return Response({"error": "Factura no encontrada"}, status=status.HTTP_404_NOT_FOUND)
 
+
     def generate_pdf(self, factura):
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter)
@@ -93,44 +94,47 @@ class FacturaDownloadView(APIView):
         iva = monto_total * iva_porcentaje
 
         styles = getSampleStyleSheet()
-        header_style = ParagraphStyle(name='Header', fontSize=16, spaceAfter=12, alignment=0)  # Alineación izquierda
-        title_style = ParagraphStyle(name='Title', fontSize=12, spaceAfter=8, alignment=0)  # Tamaño de fuente menor
+        header_style = ParagraphStyle(name='Header', fontSize=16, spaceAfter=12, alignment=1)  # Centered alignment
+        title_style = ParagraphStyle(name='Title', fontSize=10, spaceAfter=8, alignment=0)  # Left alignment
         normal_style = styles["Normal"]
 
-        # Agregar logo de la entidad emisora
+        # Logo de la entidad emisora y datos de la factura
         logo_path = os.path.join(os.path.dirname(__file__), 'img', 'logo.png')
         try:
             logo = Image(logo_path)
             logo.drawHeight = 1.5 * inch
             logo.drawWidth = 1.5 * inch
-            logo_table = Table([[logo]], colWidths=[1.5 * inch])
+            logo_table = Table([
+                [logo, '', Paragraph("<b>N° de Factura:</b>", normal_style), Paragraph(f"{factura.id}", normal_style)],
+                ['', '', Paragraph("<b>Fecha de emisión:</b>", normal_style), Paragraph(f"{factura.fecha_vencimiento.strftime('%d/%m/%Y')}", normal_style)],
+                ['','',Paragraph("<b>Fecha de vencimiento:</b>", normal_style), Paragraph(f"{factura.fecha_vencimiento.strftime('%d/%m/%Y')}", normal_style)],
+                ['','',Paragraph("<b>Estado:</b>", normal_style), Paragraph(f"{factura.estado}", normal_style)],
+            ], colWidths=[2 * inch, 2.5 * inch, 1.5 * inch, 1.5 * inch])
             logo_table.setStyle(TableStyle([
-                ('ALIGN', (0, 0), (0, 0), 'RIGHT'),
-                ('VALIGN', (0, 0), (0, 0), 'TOP')
+                ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+                ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('LEFTPADDING', (0, 0), (0, 0), 0),
+                ('TOPPADDING', (0, 0), (-1, -1), 10),
             ]))
             elements.append(logo_table)
         except:
-            pass
-
-        # Encabezado de la factura
-        elements.append(Paragraph("Factura", header_style))
+            elements.append(Paragraph("Factura", header_style))
         elements.append(Spacer(1, 12))
 
-        # Información de la factura
+        # Información del emisor y receptor
         data_info = [
-            ["De:", "Changarro de Mexacol.", "", "N° de Factura", f"{factura.id}"],
-            ["", "Algun lugar del mundo", "", "Fecha de emisión", f"{factura.fecha_vencimiento.strftime('%d/%m/%Y')}"],
-            ["", "Hecho con amor <3", "", "", ""],
-            ["Facturar a:", f"{factura.cliente.nombre} {factura.cliente.apellido}", "", "Fecha de pago", f"{factura.fecha_vencimiento.strftime('%d/%m/%Y')}"]
+            [Paragraph("<b>Datos del emisor:</b>", normal_style), '', Paragraph("<b>Datos del receptor:</b>", normal_style)],
+            [f"Changarro de Mexacol.\nAlgun lugar del mundo\nHecho con amor <3", '', f"{factura.cliente.nombre} {factura.cliente.apellido}"]
         ]
-        table_info = Table(data_info, colWidths=[1 * inch, 2.5 * inch, 0.5 * inch, 2 * inch, 2 * inch])
+        table_info = Table(data_info, colWidths=[3 * inch, 1 * inch, 3 * inch])
         table_info.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 0), (-1, -1), 12),
-            ('SPAN', (1, 0), (1, 1)),  # Combina celdas para la dirección
-            ('SPAN', (1, 3), (1, 3)),  # Combina celdas para la dirección del cliente
-            ('SPAN', (0, 3), (0, 3)),  # Combina celdas para "Facturar a:"
+            ('SPAN', (1, 0), (1, 1)),  # Empty column for spacing
+            ('LEFTPADDING', (0, 0), (-1, -1), 10),
         ]))
         elements.append(table_info)
         elements.append(Spacer(1, 12))
@@ -157,39 +161,57 @@ class FacturaDownloadView(APIView):
         elements.append(table_detalle)
         elements.append(Spacer(1, 24))
 
-        # Tabla de total
-        data_total = [["Total", f"${monto_total:.2f}"]]
-        table_total = Table(data_total, colWidths=[3.5 * inch, 2 * inch])
-        table_total.setStyle(TableStyle([
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-            ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-            ('FONTSIZE', (0, 0), (1, 0), 14),
-            ('FONTNAME', (0, 0), (1, 0), 'Helvetica-Bold'),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
+        
+
+        # Condiciones y forma de pago, y Nota y firma
+        payment_conditions_table = Table(
+            [[Paragraph("<b>Condiciones y forma de pago</b>", title_style)],  # Negrita en el título
+            [Paragraph("Pago en efectivo, tarjeta de crédito o transferencia bancaria.", normal_style)],
+            [Paragraph("Pago realizado en el local.", normal_style)],
+            [Paragraph("0 días plazo de pago.", normal_style)]],
+            colWidths=[3 * inch])
+        payment_conditions_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 16),
         ]))
-        elements.append(table_total)
-        elements.append(Spacer(1, 24))
 
-        # Condiciones y forma de pago
-        elements.append(Paragraph("Condiciones y forma de pago", title_style))
-        elements.append(Spacer(1, 1))
-        elements.append(Paragraph("Pago en efectivo, tarjeta de crédito o transferencia bancaria.", normal_style))
-        elements.append(Paragraph("Pago realizado en el local.", normal_style))
-        elements.append(Paragraph("0 días plazo de pago.", normal_style))
-        elements.append(Spacer(1, 12))
+        note_and_signature_table = Table(
+            [[Paragraph("Gracias por su preferencia. Si tiene alguna pregunta sobre esta factura, no dude en contactarnos.", normal_style)],
+            [Spacer(1, 12)],
+            [Paragraph("Atentamente, el equipo de Changarro de Mexacol.", normal_style)]],
+            colWidths=[4.5 * inch])
+        note_and_signature_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 4),
+        ]))
 
-        # Nota y firma
-        elements.append(Paragraph("Gracias por su preferencia. Si tiene alguna pregunta sobre esta factura, no dude en contactarnos.", normal_style))
-        elements.append(Spacer(1, 12))
-        elements.append(Paragraph("Atentamente, el equipo de Changarro de Mexacol.", normal_style))
-        elements.append(Spacer(1, 12))
+        # Secciona las tablas en dos columnas, centradas
+        midfooter_table = Table([[payment_conditions_table]], colWidths=[2 * inch, 2.5 * inch])
+        midfooter_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+        elements.append(Spacer(1, 20))  # Añade un espacio para bajar la tabla de agradecimiento
+        elements.append(midfooter_table)
+
+        # Secciona las tablas en dos columnas, centradas
+        footer_table = Table([[note_and_signature_table]], colWidths=[3 * inch, 2.5 * inch])
+        footer_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+
+        elements.append(Spacer(-2, -10))  # Ajuste de espacio para subir la tabla de agradecimiento
+        elements.append(footer_table)
 
         # Generar el PDF
         doc.build(elements)
         buffer.seek(0)
         return buffer
+
+
 
 
 
