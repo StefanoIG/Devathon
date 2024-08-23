@@ -46,7 +46,7 @@ class ClienteDetailView(APIView):
         if user.rol == 'admin':
             clientes = Cliente.objects.all()
         elif user.rol == 'empleado':
-            clientes = Cliente.objects.values('nombre', 'apellido')
+            clientes = Cliente.objects.all().values('nombre', 'apellido', 'telefono', 'correo_electronico')  # Incluye todos los campos necesarios
         elif user.rol == 'user':
             clientes = Cliente.objects.filter(id=user.id)
         else:

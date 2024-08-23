@@ -10,6 +10,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import Reserva
 from mesas.models import Mesa
+from rest_framework.views import APIView
 from .serializers import ReservaSerializer
 
 # Validaciones de hora de reserva solo para clientes
@@ -119,8 +120,8 @@ def handle_reservation(sender, instance, **kwargs):
     print(f"Current DateTime: {now}")
 
     # Calcular tiempos
-    time_until_warning = (reserva_datetime - now).total_seconds() - 1800  # 30 minutos antes de la hora de reserva(1800 segundos)
-    time_until_cancellation = (reserva_datetime - now).total_seconds() + 3600  # 1 hora después de la reserva(3600 segundos)
+    time_until_warning = (reserva_datetime - now).total_seconds() - 100  # 30 minutos antes de la hora de reserva(1800 segundos)
+    time_until_cancellation = (reserva_datetime - now).total_seconds() + 120  # 1 hora después de la reserva(3600 segundos)
     time_until_reserved = (reserva_datetime - now).total_seconds() - 300  # 5 minutos antes de la hora de reserva(300 segundos)
 
     if time_until_warning > 0:
@@ -256,3 +257,24 @@ def crear_factura_si_confirmada(sender, instance, **kwargs):
             reserva=instance,
             cliente=instance.cliente,
         )
+
+class UserReservationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Verifica que el rol del usuario no sea empleado o admin
+        if user.rol not in ['Empleado', 'admin']:
+            # Obtiene la fecha de hoy
+            today = timezone.now().date()
+
+            # Filtra todas las reservas donde la fecha sea hoy o en el futuro
+            reservas = Reserva.objects.filter(fecha_reserva__gte=today)
+
+            # Serializa las reservas para enviarlas en la respuesta
+            serializer = ReservaSerializer(reservas, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response({'error': 'Unauthorized access'}, status=status.HTTP_403_FORBIDDEN)
+

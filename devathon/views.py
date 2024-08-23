@@ -58,17 +58,18 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 
 class PasswordResetRequestAPI(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny] 
 
     def post(self, request):
         email = request.data.get('email')
         user = User.objects.filter(correo_electronico=email).first()
+
         if user:
             uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
-            reset_url = request.build_absolute_uri(
-                reverse('password_reset_confirm') + f"?uid={uidb64}&token={token}"
-            )
+
+            # Aquí cambias la URL para que apunte a la vista de tu aplicación React
+            frontend_url = f"http://localhost:5173/reset-password/{uidb64}/{token}"
 
             # Genera el cuerpo del correo electrónico directamente en el código
             email_body = f"""
@@ -76,7 +77,7 @@ class PasswordResetRequestAPI(APIView):
 
             Recibimos una solicitud para restablecer tu contraseña. Puedes hacerlo a través del siguiente enlace:
 
-            {reset_url}
+            {frontend_url}
 
             Si no solicitaste este cambio, puedes ignorar este correo.
 
@@ -92,6 +93,7 @@ class PasswordResetRequestAPI(APIView):
                 fail_silently=False,
             )
             return Response({'message': 'Password reset email has been sent.'}, status=status.HTTP_200_OK)
+
         return Response({'error': 'Email not found'}, status=status.HTTP_400_BAD_REQUEST)
 
 
