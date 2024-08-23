@@ -2,6 +2,6 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import Mesa
+from .models import Factura
 
-admin.site.register(Mesa)
+admin.site.register(Factura)
