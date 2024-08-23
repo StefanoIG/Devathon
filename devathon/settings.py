@@ -170,6 +170,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'stefano20033@gmail.com'
-EMAIL_HOST_PASSWORD = 'fynl zjhq mycd qlly'
+EMAIL_HOST_PASSWORD = 'exnh vwdv pcgb whtz'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+APPEND_SLASH = False

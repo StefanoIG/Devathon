@@ -8,7 +8,7 @@ router.register(r'reservas', ReservaViewSet)
 
 urlpatterns = [
     path('api/v1/reservaAll/', include(router.urls)),  # Incluye las rutas del ViewSet
-    path('api/v1/crear-reserva/', create_reserva, name='crear_reserva'),  # Ruta para la vista de crear reserva
+    path('api/v1/crear-reserva', create_reserva, name='crear_reserva'),  # Ruta para la vista de crear reserva
     path('api/v1/cancelar-reserva/', cancel_reserva, name='cancelar_reserva'),  # Ruta para cancelar reserva
     path('api/v1/confirmar-reserva/', confirmar_reserva, name='confirmar_reserva'),  # Ruta para confirmar reserva
 ]

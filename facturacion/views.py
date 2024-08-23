@@ -77,6 +77,10 @@ class FacturaDownloadView(APIView):
             if request.user.rol == 'cliente' and factura.cliente != request.user:
                 return Response({"error": "No tienes permiso para acceder a esta factura."}, status=status.HTTP_403_FORBIDDEN)
             
+            #Verificar que la factura este activa (Is_active = True)
+            if not factura.is_active:
+                return Response({"error": "La factura no está disponible para descarga."}, status=status.HTTP_404_NOT_FOUND)
+            
             pdf_buffer = self.generate_pdf(factura)
             return FileResponse(pdf_buffer, as_attachment=True, filename=f"factura {factura.id}.pdf")
         
